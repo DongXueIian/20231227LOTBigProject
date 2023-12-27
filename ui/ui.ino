@@ -96,24 +96,24 @@ void setup()
     // uncomment one of these demos
 	ui_init();
 }
-
-String serialStr="";
+long lastTime=0;
 void loop()
 {
   lv_task_handler(); /* let the GUI do its work */
-  delay(200);
-    // 检查是否有可用的串口数据
+  // if(millis()-lastTime>1000){
+  //   lastTime=millis();
+  //   sc1_Animation(ui_Panel2, 0);
+  // }
+  delay(5);
+  // lv_label_set_text(ui_sc1L1, " 2:12");
+}
+
+String serialEvent(String serialStr){
+  // 检查是否有可用的串口数据
   while (Serial.available() > 0) {
     // 读取串口数据并追加到字符串
     char incomingChar = Serial.read();
     serialStr += incomingChar;
   }
-  // 在串口中打印接收到的数据
-  if (serialStr.length() > 0) {
-    Serial.print("Received data: ");
-    Serial.println(serialStr);
-    lv_label_set_text(ui_Label1, serialStr.c_str());
-    // 处理完数据后清空字符串
-    serialStr = "";
-  }
+  return serialStr;  
 }
