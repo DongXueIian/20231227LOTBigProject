@@ -4,6 +4,8 @@
 #include <TFT_eSPI.h> 
 #include <ui.h>
 #include "touch.h"
+// #include "wifi.h"
+
 
 static const uint16_t screenWidth  = 320;
 static const uint16_t screenHeight = 240;
@@ -95,6 +97,7 @@ void setup()
 
     // uncomment one of these demos
 	ui_init();
+  // wifiSTABegin("bobolili","00000000");
 }
 long lastTime=0;
 void loop()
