@@ -4,13 +4,16 @@
 #include <TFT_eSPI.h>
 #include <ui.h>
 #include "touch.h"
-// #include "wifi.h"
+#include "config.h"
+
 
 
 static const uint16_t screenWidth = 320;
 static const uint16_t screenHeight = 240;
 static lv_disp_draw_buf_t disp_buf;
-static lv_color_t buf[screenWidth*30];
+// static lv_color_t buf[screenWidth * 30];
+static lv_color_t *buf;
+
 TFT_eSPI my_lcd = TFT_eSPI();
 
 #if USE_LV_LOG != 0
@@ -48,6 +51,8 @@ void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data) {
 }
 
 void setup() {
+  buf = (lv_color_t *)malloc(screenWidth * 30 * sizeof(lv_color_t));
+
   Serial.begin(115200); /* prepare for possible serial debug */
   String LVGL_Arduino = "Hello Arduino! ";
   LVGL_Arduino += String('V') + lv_version_major() + "." + lv_version_minor() + "." + lv_version_patch();
@@ -60,7 +65,6 @@ void setup() {
 #if USE_LV_LOG != 0
   lv_log_register_print_cb(my_print); /* register print function for debugging */
 #endif
-
   lv_disp_draw_buf_init(&disp_buf, buf, NULL, screenWidth * 30);
 
   /*Initialize the display*/
@@ -86,15 +90,25 @@ void setup() {
 
   // uncomment one of these demos
   ui_init();
-  // wifiSTABegin("bobolili","00000000");
+  wifiSTABegin("bobolili", "00000000");
+  NTPBegin();
 }
 long lastTime = 0;
+int isWeatherAndTimeUpdate = 0;
 void loop() {
   lv_task_handler(); /* let the GUI do its work */
-  // if(millis()-lastTime>1000){
-  //   lastTime=millis();
-  //   sc1_Animation(ui_Panel2, 0);
-  // }
+  if (isWeatherAndTimeUpdate == 0) {
+    struct tm *timeinfo = NTPUpdate();
+    String *weatherData = getWeather();
+    lv_label_set_text(ui_date, (String(timeinfo->tm_year) + "/" + String(timeinfo->tm_mon) + "/" + String(timeinfo->tm_mday)).c_str());
+    lv_label_set_text(ui_time, (String(timeinfo->tm_hour) + ":" + String(timeinfo->tm_min)).c_str());
+    lv_label_set_text(ui_temperature, (weatherData[5] + "-" + weatherData[4]).c_str());
+    lv_label_set_text(ui_weather, (weatherData[0]).c_str());
+    isWeatherAndTimeUpdate=1;
+  }
+  if (millis() - lastTime > 1000) {
+    lastTime = millis();
+  }
   delay(5);
   // lv_label_set_text(ui_sc1L1, " 2:12");
 }
