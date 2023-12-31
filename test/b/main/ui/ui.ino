@@ -90,29 +90,76 @@ void setup() {
 
   // uncomment one of these demos
   ui_init();
-  wifiSTABegin("bobolili", "00000000");
-  NTPBegin();
+  checkFirstUse();
+  EEPROM.begin(4096);
+  clockSetup();
 }
 long lastTime = 0;
 int isWeatherAndTimeUpdate = 0;
-int timeCount=0;
+int timeCount = 0;
 void loop() {
   lv_task_handler(); /* let the GUI do its work */
-  if (isWeatherAndTimeUpdate == 0) {
-    struct tm *timeinfo = timeNetUpdate();
+  if (isConnectWiFi == false) {
+    wifiSTABegin("bobolili", "00000000");
+    NTPBegin();
+  }
+  if (isWeatherAndTimeUpdate == 0 && isConnectWiFi == true) {
+    timeNetUpdate();
     String *weatherData = getWeather();
-    lv_label_set_text(ui_date, (String(timeinfo->tm_year) + "/" + String(timeinfo->tm_mon) + "/" + String(timeinfo->tm_mday)).c_str());
-    lv_label_set_text(ui_time, (String(timeinfo->tm_hour) + ":" + String(timeinfo->tm_min)).c_str());
-    lv_label_set_text(ui_temperature, (weatherData[5] + "-" + weatherData[4]).c_str());
-    lv_label_set_text(ui_weather, (weatherData[0]).c_str());
-    isWeatherAndTimeUpdate=1;
+    if (weatherData != nullptr) {
+      lv_label_set_text(ui_temperature, (weatherData[5] + "-" + weatherData[4]).c_str());
+      lv_label_set_text(ui_weather, (weatherData[0]).c_str());
+    }
+    if (timeinfo != nullptr) {
+      lv_label_set_text(ui_date, (String(timeinfo->tm_year) + "/" + String(timeinfo->tm_mon) + "/" + String(timeinfo->tm_mday)).c_str());
+      lv_label_set_text(ui_time, (String(timeinfo->tm_hour) + ":" + String(timeinfo->tm_min)).c_str());
+    }
+    isWeatherAndTimeUpdate = 1;
   }
   if (millis() - lastTime > 1000) {
     timeCount++;
     lastTime = millis();
-    if(timeCount%59==0){
-      isWeatherAndTimeUpdate=0;
+    if (timeCount % 599 == 0) {
+      isWeatherAndTimeUpdate = 0;
     }
+  }
+
+  // 获取当前活动屏幕
+  lv_obj_t *current_screen = lv_scr_act();
+  // 使用 switch 语句根据当前屏幕进行处理
+  if (current_screen == ui_Screen1) {
+    // Serial.printf("ui_Screen1!");
+    // 处理第一个屏幕的逻辑
+  } else if (current_screen == ui_Screen4) {
+    struct clock *clocks = getClocks();
+
+    if (clocks != NULL) {
+      Serial.println("Clocks:");
+      for (int i = 0; i < currentClockLength; ++i) {
+        Serial.print("ID: ");
+        Serial.println(clocks[i].id);
+        Serial.print("Hour: ");
+        Serial.println(clocks[i].hour);
+        Serial.print("Minute: ");
+        Serial.println(clocks[i].minute);
+        Serial.print("Remark: ");
+        Serial.println(clocks[i].remark);
+        Serial.print("Active: ");
+        Serial.println(clocks[i].active ? "true" : "false");
+        Serial.print("Everyday: ");
+        Serial.println(clocks[i].everyday ? "true" : "false");
+        Serial.println("--------------------");
+      }
+
+      // 释放动态分配的内存
+      free(clocks);
+    } else {
+      Serial.println("Failed to get clocks");
+    }
+    // addClockPageSetup();
+    // 处理第二个屏幕的逻辑
+  } else {
+    // 处理未知屏幕的逻辑
   }
   delay(5);
   // lv_label_set_text(ui_sc1L1, " 2:12");

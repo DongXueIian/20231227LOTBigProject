@@ -12,7 +12,7 @@ void disconnectWiFi();
 #include <TimeLib.h>
 
 void NTPBegin();
-tm *NTPUpdate();
+tm *timeNetUpdate();
 
 //心知天气获取时间
 #include <ArduinoJson.h>

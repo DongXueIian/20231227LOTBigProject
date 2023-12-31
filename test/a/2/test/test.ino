@@ -13,7 +13,7 @@ void loop() {
   // put your main code here, to run repeatedly:
   count++;
   if (count % 200000 == 0) {
-    struct tm* timeinfo = NTPUpdate();
+    struct tm* timeinfo = timeNetUpdate();
     String* weatherData = getWeather();
     if (weatherData != nullptr) {
       Serial.println("Weather Data:");

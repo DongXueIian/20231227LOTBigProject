@@ -19,7 +19,7 @@ void NTPBegin(){
   Serial.println("Time Synchronized");
 }
 
-tm *NTPUpdate(){
+tm *timeNetUpdate(){
     // Update time from NTP server
   timeClient.update();
 
