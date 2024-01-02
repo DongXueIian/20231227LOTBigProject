@@ -90,13 +90,14 @@ void setup() {
 
   // uncomment one of these demos
   ui_init();
-  checkFirstUse();
   EEPROM.begin(4096);
+  checkFirstUse();
   clockSetup();
 }
 long lastTime = 0;
 int isWeatherAndTimeUpdate = 0;
 int timeCount = 0;
+int hasEnterSc4 = false;
 void loop() {
   lv_task_handler(); /* let the GUI do its work */
   if (isConnectWiFi == false) {
@@ -131,33 +132,11 @@ void loop() {
     // Serial.printf("ui_Screen1!");
     // 处理第一个屏幕的逻辑
   } else if (current_screen == ui_Screen4) {
-    struct clock *clocks = getClocks();
-
-    if (clocks != NULL) {
-      Serial.println("Clocks:");
-      for (int i = 0; i < currentClockLength; ++i) {
-        Serial.print("ID: ");
-        Serial.println(clocks[i].id);
-        Serial.print("Hour: ");
-        Serial.println(clocks[i].hour);
-        Serial.print("Minute: ");
-        Serial.println(clocks[i].minute);
-        Serial.print("Remark: ");
-        Serial.println(clocks[i].remark);
-        Serial.print("Active: ");
-        Serial.println(clocks[i].active ? "true" : "false");
-        Serial.print("Everyday: ");
-        Serial.println(clocks[i].everyday ? "true" : "false");
-        Serial.println("--------------------");
-      }
-
-      // 释放动态分配的内存
-      free(clocks);
-    } else {
-      Serial.println("Failed to get clocks");
-    }
+    
     // addClockPageSetup();
     // 处理第二个屏幕的逻辑
+  } else if (current_screen == ui_Screen3) {
+
   } else {
     // 处理未知屏幕的逻辑
   }

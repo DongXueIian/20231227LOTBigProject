@@ -5,6 +5,8 @@
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "ntp3.aliyun.com");
 
+tm* timeinfo=nullptr;
+
 void NTPBegin() {
   // Initialize and synchronize time
   timeClient.begin();
